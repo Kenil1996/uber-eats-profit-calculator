@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Uber Eats / Deliveroo Profit Calculator (UK)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f0f4f8;
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      min-height: 100vh;
+      color: #222;
+    }
+    .container {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+      max-width: 480px;
+      width: 100%;
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 30px;
+      font-weight: 600;
+      color: #0a84ff;
+      user-select: none;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: #444;
+    }
+    input[type=number] {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 20px;
+      border: 1.8px solid #d1d9e6;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: border-color 0.25s ease;
+    }
+    input[type=number]:focus {
+      border-color: #0a84ff;
+      outline: none;
+      box-shadow: 0 0 8px rgba(10, 132, 255, 0.3);
+    }
+    button {
+      width: 100%;
+      background-color: #0a84ff;
+      color: white;
+      padding: 14px 0;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      user-select: none;
+      transition: background-color 0.3s ease;
+      margin-bottom: 15px;
+    }
+    button:hover {
+      background-color: #006fd6;
+    }
+    button:active {
+      background-color: #004a9a;
+    }
+    .result {
+      padding: 20px;
+      background-color: #f9fafb;
+      border-radius: 10px;
+      box-shadow: inset 0 0 6px rgba(0,0,0,0.05);
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: #333;
+      min-height: 160px;
+      user-select: none;
+      transition: opacity 0.5s ease;
+    }
+    .profit {
+      color: green;
+      font-weight: 700;
+    }
+    .loss {
+      color: red;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>💷 Uber Eats / Deliveroo Profit Calculator (UK)</h2>
+
+    <label for="foodPrice">Food Price (COD) Paid by Customer (£)</label>
+    <input type="number" id="foodPrice" step="0.01" min="0" placeholder="e.g. 23.49" />
+
+    <label for="deliveryFee">Delivery Fee Paid by Customer (£)</label>
+    <input type="number" id="deliveryFee" step="0.01" min="0" placeholder="e.g. 6.99" />
+
+    <label for="commissionRate">Platform Commission Rate on Food (%)</label>
+    <input type="number" id="commissionRate" step="0.01" min="0" max="100" placeholder="e.g. 30" />
+
+    <label for="cog">Cost of Goods (COG) (£)</label>
+    <input type="number" id="cog" step="0.01" min="0" placeholder="e.g. 10.00" />
+
+    <label for="driverPayment">Delivery Cost Paid to Driver (£)</label>
+    <input type="number" id="driverPayment" step="0.01" min="0" placeholder="e.g. 9.99" />
+
+    <label for="vatRate">VAT Rate on Food (%)</label>
+    <input type="number" id="vatRate" step="0.01" min="0" max="100" placeholder="e.g. 20" />
+
+    <button onclick="calculateProfit()">Calculate Profit</button>
+    <button onclick="resetFields()" style="background:#aaa; margin-top: 0;">Reset</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    function calculateProfit() {
+      const foodPrice = parseFloat(document.getElementById('foodPrice').value) || 0;
+      const deliveryFee = parseFloat(document.getElementById('deliveryFee').value) || 0;
+      const commissionRate = parseFloat(document.getElementById('commissionRate').value) || 0;
+      const cog = parseFloat(document.getElementById('cog').value) || 0;
+      const driverPayment = parseFloat(document.getElementById('driverPayment').value) || 0;
+      const vatRate = parseFloat(document.getElementById('vatRate').value) || 0;
+
+      const commission = (commissionRate / 100) * foodPrice;
+      const vat = (vatRate / 100) * foodPrice;
+      const platformPayment = foodPrice - commission;
+
+      const totalIncome = platformPayment + deliveryFee;
+      const totalCost = cog + vat + driverPayment;
+      const profit = totalIncome - totalCost;
+
+      const profitClass = profit >= 0 ? 'profit' : 'loss';
+
+      document.getElementById('result').innerHTML = `
+        <p><strong>Customer Paid Total:</strong> £${(foodPrice + deliveryFee).toFixed(2)}</p>
+        <p><strong>Platform Commission:</strong> £${commission.toFixed(2)}</p>
+        <p><strong>VAT on Food:</strong> £${vat.toFixed(2)}</p>
+        <p><strong>Amount Received from Platform:</strong> £${platformPayment.toFixed(2)}</p>
+        <p><strong>Total Income (Platform + Delivery Fee):</strong> £${totalIncome.toFixed(2)}</p>
+        <p><strong>Total Cost (COG + VAT + Driver):</strong> £${totalCost.toFixed(2)}</p>
+        <p class="${profitClass}" style="font-size:1.3rem; margin-top: 15px;">
+          Net Profit: £${profit.toFixed(2)}
+        </p>
+      `;
+    }
+
+    function resetFields() {
+      ['foodPrice', 'deliveryFee', 'commissionRate', 'cog', 'driverPayment', 'vatRate'].forEach(id => {
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('result').innerHTML = '';
+    }
+  </script>
+</body>
+</html>
